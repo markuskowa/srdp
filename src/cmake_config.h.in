@@ -1,0 +1,7 @@
+#ifndef CMAKE_CONFIG_H
+#define CMAKE_CONFIG_H
+
+#define PROJECT_VERSION "@PROJECT_VERSION@"
+#define PROJECT_NAME "@PROJECT_NAME@"
+
+#endif

@@ -1,0 +1,48 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1739736696,
+        "narHash": "sha256-zON2GNBkzsIyALlOCFiEBcIjI4w38GYOb+P+R4S8Jsw=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d74a2335ac9c133d6bbec9fc98d91a77f1604c1f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "scas": "scas"
+      }
+    },
+    "scas": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1740691939,
+        "narHash": "sha256-1bFiDjPTcynPIMCdxIhwFHRnWGwn8UVj4Deq4FgvRu8=",
+        "owner": "markuskowa",
+        "repo": "scas",
+        "rev": "e0c10dc3b4481dd832a1013a77f5284600cce77d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "markuskowa",
+        "repo": "scas",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
