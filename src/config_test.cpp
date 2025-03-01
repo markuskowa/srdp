@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Markus Kowalewski
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <iostream>
 #include <catch2/catch_test_macros.hpp>
 

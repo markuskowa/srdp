@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Markus Kowalewski
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include "config.h"
 
 namespace srdp {

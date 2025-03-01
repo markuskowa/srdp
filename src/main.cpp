@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Markus Kowalewski
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <cstdlib>
 #include <iostream>
 #include <boost/uuid/uuid_io.hpp>
