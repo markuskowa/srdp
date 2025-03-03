@@ -29,11 +29,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1740691939,
-        "narHash": "sha256-1bFiDjPTcynPIMCdxIhwFHRnWGwn8UVj4Deq4FgvRu8=",
+        "lastModified": 1741022071,
+        "narHash": "sha256-FLKTjcco3DY5l7v6SjTFbhBXlN7zOFo8c3lXzftARNo=",
         "owner": "markuskowa",
         "repo": "scas",
-        "rev": "e0c10dc3b4481dd832a1013a77f5284600cce77d",
+        "rev": "74fc3c7f342ea7041f4bb5afa87c5b856f75ecd8",
         "type": "github"
       },
       "original": {

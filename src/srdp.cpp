@@ -288,7 +288,6 @@ namespace srdp {
     dbfile.owner = get_user_name();
     dbfile.ctime = get_timestamp_now();  // FIXME use actual file mtime
 
-    std::cout << name << "\n";
     if (!path_is_in_dir(name))
       throw std::runtime_error("File not in project directory");
 
@@ -362,6 +361,31 @@ namespace srdp {
     }
 
     return file;
+  }
+
+  void Srdp::verify(){
+    scas::Store store(get_store_dir());
+
+    if (!store.verify_store())
+      std::cout << "Store is inconsistent!" << "\n";
+
+    // check if files match DB
+    auto file_list = File(db).get_all_files();
+
+    for (auto f : file_list) {
+      if (!f.path) {
+        std::cout << "File " << scas::Hash::convert_hash_to_string(f.hash) << " "
+          << (f.original_name ? *f.original_name : "")
+          << " has no path assigned!\n";
+
+      } else if (!fs::exists(top_level_dir / *f.path)) {
+        std::cout << *f.path << " does not exist!\n";
+      } else if (!store.file_is_in_store(top_level_dir / *f.path) || !store.path_coincides_with_store(top_level_dir / *f.path)) {
+        std::cout << *f.path << " is not located in store!\n";
+      } else if (fs::file_size(top_level_dir / *f.path) != f.size) {
+        std::cout << *f.path << " has the wrong file size in DB!\n";
+      }
+    }
   }
 }
 

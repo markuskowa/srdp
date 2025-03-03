@@ -82,6 +82,8 @@ namespace srdp {
       File add_file(const std::string& project, const std::string& experiment, const fs::path& name, File::role_t role);
       File load_file(const std::string& project, const std::string& experiment, const std::string& id);
       void unlink_file(const std::string& project, const std::string& experiment, const std::string& id);
+
+      void verify();
   };
 }
 

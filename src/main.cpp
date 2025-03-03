@@ -541,8 +541,16 @@ namespace srdp {
     std::cout << "  project, p       Manage project settings.\n";
     std::cout << "  experiment, e    Manage experiment settings.\n";
     std::cout << "  file, f          Manage file handling.\n";
+    std::cout << "  verify, v          Verfify store and database.\n";
   }
 
+  void command_verify(int argc, char *argv[], const options& cmdopts){
+    std::string target_dir = "./";
+    if (!cmdopts.dir.empty()) target_dir = cmdopts.dir;
+    Srdp srdp(target_dir, true);
+
+    srdp.verify();
+  }
 }
 
 /**
@@ -600,6 +608,8 @@ int main(int argc, char* argv[]){
         srdp::command_experiment(new_argc, new_argv, command_opts);
       } else if (cmd == "f" || cmd == "file") {
         srdp::command_file(new_argc, new_argv, command_opts);
+      } else if (cmd == "v" || cmd == "verify") {
+        srdp::command_verify(new_argc, new_argv, command_opts);
       } else
         throw std::invalid_argument("Unknown command");
     } else {

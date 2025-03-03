@@ -202,6 +202,13 @@ SCENARIO("Files in DB","[files]") {
         REQUIRE( tree.children[1].children.size() == 1 );
         REQUIRE( tree.children[1].children[0].node.hash == files[0][0].hash );
       }
+
+      THEN ("Can list all files"){
+        auto file_list = srdp::File(db).get_all_files();
+
+        // 4 files + 1 linked
+        REQUIRE( file_list.size() == 5 );
+      }
     }
   }
   std::filesystem::remove(db_path);

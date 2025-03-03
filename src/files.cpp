@@ -51,6 +51,7 @@ namespace srdp {
         INSERT OR IGNORE INTO file_roles(id, role) VALUES(2, 'output');
         INSERT OR IGNORE INTO file_roles(id, role) VALUES(3, 'program');
         INSERT OR IGNORE INTO file_roles(id, role) VALUES(4, 'note');
+        INSERT OR IGNORE INTO file_roles(id, role) VALUES(4, 'nixpath');
     )");
   }
 
@@ -85,6 +86,11 @@ namespace srdp {
       return it->second;
     else
       throw std::runtime_error("Invalid role");
+  }
+
+  File::File(std::shared_ptr<Sql>& dbin) :
+    db(dbin)
+  {
   }
 
   File::File(std::shared_ptr<Sql>& dbin, const Experiment& exp) :
@@ -434,4 +440,48 @@ namespace srdp {
     return tree;
   }
 
+  std::vector<File> File::get_all_files(){
+    auto res = db->query(R"(
+        SELECT
+          files.hash, files.size, files.name, files.creator, files.owner, files.ctime, files.metadata, file_map.path, file_map.role, file_map.uuid
+        FROM file_map
+        JOIN files ON file_map.hash = files.hash;
+      )",
+       Sql::vec_sql_t{},
+       Sql::vec_sql_t{bin_to_blob(hash),        // hash
+                      int64_t(0),               // size
+                      std::string(),            // name
+                      bin_to_blob(uuids::random_generator()()),  // creator
+                      std::string(),            // owner
+                      int64_t(0),               // ctime
+                      std::string(),            // metadata
+                      std::string(),            // path
+                      int(0),                   // role
+                      bin_to_blob(uuids::random_generator()())
+                      });
+
+    std::vector<File> files;
+
+    while (res) {
+      auto row = *res;
+      File f(db);
+
+      f.hash = blob_to_bin<scas::Hash::hash_t>(std::get<Sql::blob_t>(*row[0]));
+      f.size = std::get<int64_t>(*row[1]);
+      f.original_name = Sql::sql_repack_optional<std::string>(row[2]);
+      f.creator_uuid = Sql::sql_repack_optional<Sql::blob_t, uuids::uuid>(row[3], blob_to_bin<uuids::uuid>);
+      f.owner = Sql::sql_repack_optional<std::string>(row[4]);
+      f.ctime = Sql::sql_repack_optional<int64_t>(row[5]);
+      f.metadata = Sql::sql_repack_optional<std::string>(row[6]);
+      f.path = Sql::sql_repack_optional<std::string>(row[7]);
+      f.role = Sql::sql_repack_optional<int, role_t>(row[8], [](int in){return role_t(in);});
+      f.experiment = blob_to_bin<uuids::uuid>(std::get<Sql::blob_t>(*row[9]));
+
+      files.push_back(f);
+
+     res = db->next_row();
+    }
+
+    return files;
+  }
 }

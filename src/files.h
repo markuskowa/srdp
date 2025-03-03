@@ -25,7 +25,8 @@ namespace srdp {
         input = 1,
         output = 2,
         program = 3,
-        note = 4
+        note = 4,
+        nixpath = 5
       };
 
       static void create_table(Sql& db);
@@ -50,6 +51,7 @@ namespace srdp {
       File(std::shared_ptr<Sql>& dbin, const uuids::uuid& experiment, const scas::Hash::hash_t& hash);
 
       // Create empty
+      File(std::shared_ptr<Sql>& dbin);
       File(std::shared_ptr<Sql>& dbin, const Experiment& experiment);
       File(std::shared_ptr<Sql>& dbin, const uuids::uuid& experiment);
 
@@ -94,6 +96,11 @@ namespace srdp {
        * Track files heritage
        */
       FileTree track(int depth = 0, int max_depth = 10);
+
+      /**
+       * Get all mapped files in DB.
+       */
+      std::vector<File> get_all_files();
   };
 
   class FileTree {
