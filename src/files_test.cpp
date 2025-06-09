@@ -73,8 +73,7 @@ SCENARIO("Files in DB","[files]") {
         REQUIRE ( file2.size == content.length() );
         REQUIRE ( file2.role );
         REQUIRE ( *file2.role == *file.role );
-        REQUIRE( file2.creator_uuid );
-        REQUIRE( *file2.creator_uuid == exp.uuid );
+        REQUIRE_FALSE( file2.creator_uuid );  // root input can not have a creator
         REQUIRE( file2.original_name );
         REQUIRE( *file2.original_name == name );
         REQUIRE( file2.path );
