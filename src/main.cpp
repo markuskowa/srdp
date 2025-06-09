@@ -90,12 +90,13 @@ namespace srdp {
     std::cout << "\n";
     std::cout << "Commands:\n";
     std::cout << "  list, l:             List all projects in DB\n";
-    std::cout << "  create <name>, l:    Create a new project in DB\n";
+    std::cout << "  create <name>, l:    Create new project in DB\n";
     std::cout << "  info, i:             Show info about active project\n";
     std::cout << "  set <name|uuid>, s:  Set the current active projectl\n";
     std::cout << "  abstract, m:         Set short description for project\n";
     std::cout << "  show, j:             Print project journal\n";
-    std::cout << "  append, a:           Edit project journal\n";
+    std::cout << "  edit, e:             Edit project journal\n";
+    std::cout << "  append, a:           Append project journal\n";
     std::cout << "  remove, r:           Remove project\n";
     std::cout << "  assets, b:           List all project assets\n";
   }
@@ -262,7 +263,8 @@ namespace srdp {
     std::cout << "  set <name|uuid>, s:  Set the current active experiment\n";
     std::cout << "  abstract, m:         Set short description for experiment\n";
     std::cout << "  show, j:             Print experiment journal\n";
-    std::cout << "  append, a:           Edit experiment journal\n";
+    std::cout << "  edit, e:             Edit experiment journal\n";
+    std::cout << "  append, a:           Append experiment journal\n";
     std::cout << "  remove, r:           Remove experiment\n";
   }
 
@@ -541,7 +543,7 @@ namespace srdp {
     std::cout << "  project, p       Manage project settings.\n";
     std::cout << "  experiment, e    Manage experiment settings.\n";
     std::cout << "  file, f          Manage file handling.\n";
-    std::cout << "  verify, v          Verfify store and database.\n";
+    std::cout << "  verify, v        Verfify store and database.\n";
   }
 
   void command_verify(int argc, char *argv[], const options& cmdopts){
