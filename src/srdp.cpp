@@ -298,7 +298,7 @@ namespace srdp {
     dbfile.owner = get_user_name();
     dbfile.ctime = get_timestamp_now();  // FIXME use actual file mtime
 
-    if (!path_is_in_dir(name))
+    if (!path_is_in_dir(name)) // FIXME check for this first before we open the experiment?
       throw std::runtime_error("File not in project directory");
 
     // Create a link that is relative to project dir? Distinguish between external/internal store?
@@ -309,25 +309,19 @@ namespace srdp {
     if (exists) {
       hash_str = store.get_hash_from_path(name);
     } else {
-      store.move_to_store(name, hash_str);
+      store.copy_to_store(name, hash_str);
     }
 
     scas::Hash::hash_t hash_bin = scas::Hash::convert_string_to_hash(hash_str);
 
-    try {
-      dbfile.hash = hash_bin;
-      dbfile.size = fs::file_size(name); // FIXME: scas should return that!?
-      dbfile.create();
-    } catch (std::exception& e) {
-      if (!exists){
-        // FIXME restore original file permission?
-        auto tmp_name = fs::path(".tmp_") / name;
-        fs::rename(name, tmp_name);
-        fs::copy(tmp_name, name);
-        fs::remove(tmp_name);
-      }
-      throw;
-    }
+    dbfile.hash = hash_bin;
+    dbfile.size = fs::file_size(name); // FIXME: scas should return that!?
+    dbfile.create();
+
+    fs::remove(name);
+
+    store.create_store_link(name, hash_str);
+    store.register_gc_link(name, hash_str);
 
     return dbfile;
   }
@@ -351,7 +345,7 @@ namespace srdp {
 
         try {
           fs::rename(name, tmp_name);
-          fs::copy(tmp_name, name);
+          fs::copy(tmp_name, name); // FIXME: do reflink copy here
         } catch (std::exception& e) {
           fs::rename(tmp_name, name);
         }
