@@ -33,8 +33,10 @@ namespace srdp {
     std::cout << "hash:     " << scas::Hash::convert_hash_to_string(f.hash) << "\n";
     std::cout << "owner:    " << (f.owner ? *f.owner : "") << "\n";
     std::cout << "ctime:   "  << (f.ctime ? Srdp::get_time_stamp_fmt(*f.ctime) : "") << "\n";
-    std::cout << "creator:  " << f.resolve_creator() << "\n";
-    std::cout << "metadata: " << (f.metadata ? *f.metadata : "") << "\n";
-    std::cout << "\n\n";
+    if (f.creator_uuid)
+      std::cout << "creator:  " << f.resolve_creator() << "\n";
+    if (f.metadata)
+      std::cout << "metadata: " << *f.metadata << "\n\n";
+    std::cout << "\n";
   };
 }
