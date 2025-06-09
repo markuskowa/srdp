@@ -49,9 +49,9 @@ namespace srdp {
 
         INSERT OR IGNORE INTO file_roles(id, role) VALUES(1, 'input');
         INSERT OR IGNORE INTO file_roles(id, role) VALUES(2, 'output');
-        INSERT OR IGNORE INTO file_roles(id, role) VALUES(3, 'program');
-        INSERT OR IGNORE INTO file_roles(id, role) VALUES(4, 'note');
-        INSERT OR IGNORE INTO file_roles(id, role) VALUES(4, 'nixpath');
+        INSERT OR IGNORE INTO file_roles(id, role) VALUES(3, 'note');
+        INSERT OR IGNORE INTO file_roles(id, role) VALUES(4, 'program');
+        INSERT OR IGNORE INTO file_roles(id, role) VALUES(5, 'nixpath');
     )");
   }
 

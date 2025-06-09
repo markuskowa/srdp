@@ -24,8 +24,8 @@ namespace srdp {
         none = 0,
         input = 1,
         output = 2,
-        program = 3,
-        note = 4,
+        note = 3,
+        program = 4,
         nixpath = 5
       };
 
