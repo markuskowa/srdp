@@ -400,11 +400,11 @@ namespace srdp {
     std::cout << "                  If not given, $EDITOR will be opended.\n";
     std::cout << "\n";
     std::cout << "Commands:\n";
-    std::cout << "  list, l:               List all files in active experiment\n";
-    std::cout << "  add <role> <path>, a:  add file to experiment\n";
-    std::cout << "  info <path|hash>, i:   show info about file\n";
-    std::cout << "  unlink <path|hash>, u: detach file from experiment\n";
-    std::cout << "  track <path|hash>, t:  Track a file's heritage\n";
+    std::cout << "  list, l:                            list all files in active experiment\n";
+    std::cout << "  add <role> <path> [path [...]], a:  add file(s) to experiment\n";
+    std::cout << "  info <path|hash>, i:                show info about file\n";
+    std::cout << "  unlink <path|hash>, u:              detach file from experiment\n";
+    std::cout << "  track <path|hash>, t:               Track a file's heritage\n";
   }
 
   void command_file(int argc, char *argv[], const options& cmdopts){
@@ -451,11 +451,18 @@ namespace srdp {
           throw std::runtime_error("Invalid role");
 
         optind++;
-        fs::path path = argv[optind];
 
-        File file = srdp.add_file(cmdopts.project, cmdopts.experiment, path, role);
+        while (optind < argc) {
+          fs::path path = argv[optind];
 
-        std::cout << "Added " << File::role_to_string(*file.role) << " " << path << " (" << scas::Hash::convert_hash_to_string(file.hash) <<")\n";
+          File file = srdp.add_file(cmdopts.project, cmdopts.experiment, path, role);
+
+          std::cout << "Added " <<
+            File::role_to_string(*file.role) << " "
+            << path << " (" << scas::Hash::convert_hash_to_string(file.hash) <<")\n";
+
+          optind++;
+        }
 
       } else if (cmd == "unlink" || cmd == "u") { // remove file entry
         if (argc <= optind+1)
