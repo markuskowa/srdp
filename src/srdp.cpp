@@ -13,6 +13,7 @@
 
 namespace srdp {
 
+  const std::string Srdp::db_schema_version = "1";
   const fs::path Srdp::cfg_dir = ".srdp";
   const fs::path Srdp::db_file = "project.db";
   const fs::path Srdp::default_store_dir = "store";
@@ -26,6 +27,7 @@ namespace srdp {
       throw std::runtime_error("Invalid DB pointer.");
 
     config = Config(db);
+    check_db_schema_version();
     if (!isatty(0)) interactive = false;
   }
 
@@ -38,6 +40,7 @@ namespace srdp {
       throw std::runtime_error("Srdp: DB pointer invalid");
 
     config = Config(db);
+    check_db_schema_version();
     if (!isatty(0)) interactive = false;
   }
 
@@ -64,6 +67,7 @@ namespace srdp {
     Config::create_table(*db);
 
     Config cfg(db);
+    cfg.set_string("db_schema_version", db_schema_version);
 
     fs::path final_store_dir;
 
@@ -101,6 +105,12 @@ namespace srdp {
   //
   // Private members
   //
+
+  void Srdp::check_db_schema_version(){
+    if (config.get_string("db_schema_version") != "1")
+      throw std::runtime_error("Incompatible DB version!");
+  }
+
   std::string Srdp::get_user_name(){
     uid_t uid = geteuid();
     struct passwd *pw = getpwuid(uid);

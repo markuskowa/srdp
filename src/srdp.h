@@ -37,7 +37,9 @@ namespace srdp {
       void find_last_experiment();
       void find_open_experiments();
 
+      void check_db_schema_version();
     public:
+      static const std::string db_schema_version;
       static const fs::path cfg_dir;
       static const fs::path db_file;
       static const fs::path default_store_dir;
