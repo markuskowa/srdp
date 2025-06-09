@@ -261,9 +261,11 @@ namespace srdp {
       file_is_new = false;
     else {
 
-      if (role == role_t::output)
+      std::optional<Sql::blob_t> creator_uuid_blob;
+      if (role == role_t::output) {
         creator_uuid = experiment;
-      else
+        creator_uuid_blob = std::optional<Sql::blob_t>(bin_to_blob<uuids::uuid>(experiment));
+      } else
         creator_uuid = std::optional<uuids::uuid>();
 
       if (!ctime)
@@ -276,7 +278,7 @@ namespace srdp {
          Sql::vec_sql_t{bin_to_blob(hash),
                         int64_t(size),
                         Sql::optional_null(original_name),
-                        bin_to_blob(experiment),
+                        Sql::optional_null(creator_uuid_blob),
                         Sql::optional_null(owner),
                         *ctime,
                         Sql::optional_null(metadata)});
