@@ -39,4 +39,16 @@ namespace srdp {
       std::cout << "metadata: " << *f.metadata << "\n\n";
     std::cout << "\n";
   };
+
+  std::string fmt_relative_path(const fs::path& target, const fs::path& base_path) {
+    // lexically_relative finds the relative path from basePath to target
+    fs::path relative = target.lexically_relative(base_path);
+
+    // If target does not actually start with base_path just keep abs path
+    if (relative.empty() || relative.string().rfind("..", 0) == 0) {
+        return target;
+    } else {
+        return relative;
+    }
+  }
 }

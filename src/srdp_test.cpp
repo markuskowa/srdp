@@ -131,7 +131,7 @@ SCENARIO("SRDP management", "[srdp]") {
     }
 
     fs::current_path(old_cwd);
-    fs::remove_all(base_dir);
+    REQUIRE_NOTHROW( fs::remove_all(base_dir) );
   }
 }
 

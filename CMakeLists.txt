@@ -22,6 +22,7 @@ add_library(srdp SHARED
   src/files.cpp
   src/config.cpp
   src/srdp.cpp
+  src/ignore_file.cpp
 )
 
 install(TARGETS srdp

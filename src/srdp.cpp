@@ -16,10 +16,23 @@ namespace srdp {
   const std::string Srdp::db_schema_version = "1";
   const fs::path Srdp::cfg_dir = ".srdp";
   const fs::path Srdp::db_file = "project.db";
+  const fs::path Srdp::ignore_file_name = ".srdpignore";
   const fs::path Srdp::default_store_dir = "store";
 
-  Srdp::Srdp()
+  Srdp::Srdp() :
+    ignore_matcher(ignore_file_name)
   {
+    init_();
+  }
+
+  Srdp::Srdp(const fs::path& project_path, bool interactive) :
+    interactive(interactive),
+    ignore_matcher(ignore_file_name)
+  {
+    init_();
+  }
+
+  void Srdp::init_() {
     top_level_dir = find_top_level_dir(fs::current_path());
     db = std::make_shared<Sql>(top_level_dir / cfg_dir / db_file);
 
@@ -29,19 +42,10 @@ namespace srdp {
     config = Config(db);
     check_db_schema_version();
     if (!isatty(0)) interactive = false;
-  }
 
-  Srdp::Srdp(const fs::path& project_path, bool interactive) : interactive(interactive)
-  {
-    top_level_dir = find_top_level_dir(project_path);
-    db = std::make_shared<Sql>(top_level_dir / cfg_dir / db_file);
-
-    if (!db)
-      throw std::runtime_error("Srdp: DB pointer invalid");
-
-    config = Config(db);
-    check_db_schema_version();
-    if (!isatty(0)) interactive = false;
+    // let the matcher ignore our internal files automatically
+    ignore_matcher.add_pattern(cfg_dir.filename().string() + "/");
+    ignore_matcher.add_pattern(ignore_file_name.filename().string());
   }
 
   //
@@ -301,7 +305,7 @@ namespace srdp {
     if (!path_is_in_dir(name)) // FIXME check for this first before we open the experiment?
       throw std::runtime_error("File not in project directory");
 
-    // Create a link that is relative to project dir? Distinguish between external/internal store?
+    // Create a link that is relative to project dir? FIXME: Distinguish between external/internal store?
     scas::Store store(get_store_dir());
 
     std::string hash_str;
@@ -390,6 +394,95 @@ namespace srdp {
         std::cout << *f.path << " has the wrong file size in DB!\n";
       }
     }
+  }
+
+  // helper function for get file list
+  void iterate_dir(const fs::path& dir,
+                  std::list<Srdp::DirEntry>& list_untracked,
+                  std::list<Srdp::DirEntry>& list_tracked,
+                  scas::Store& store,
+                  Srdp& srdp
+                  ) {
+
+    Experiment exp = srdp.open_experiment();
+
+    for (const auto& entry : fs::directory_iterator(dir)) {
+      // Resolve symlinks
+      if (fs::is_symlink(symlink_status(entry.path()))) {
+
+        // Symlink is in store?
+        if (store.file_is_in_store(entry.path())) {
+          // check if file belongs to active experiment
+
+          bool is_active = false;
+          auto flist = srdp.get_file().list();
+          for (auto file: flist) {
+            std::cout << srdp.rel_to_top(entry.path(), true).string() << ":" << *file.path << std::endl;
+            if (srdp.rel_to_top(entry.path(), true).string() == *file.path) is_active = true;
+          }
+
+          list_tracked.push_back(Srdp::DirEntry{entry.path(), fs::last_write_time(entry.path()), true, is_active});
+        } else {
+          // follow symlink
+          std::error_code ec;
+          fs::path target = fs::canonical(entry.path(), ec);
+          if (!ec) {
+            // regular file
+            if (srdp.path_is_in_dir(target) && fs::is_regular_file(target)) {
+              list_untracked.push_back(Srdp::DirEntry{target, fs::last_write_time(entry.path()), false, false});
+            }
+            // directory
+            if (srdp.path_is_in_dir(target) && fs::is_directory(target)) {
+              iterate_dir(target, list_untracked, list_tracked, store, srdp);
+            }
+          }
+        }
+      // Regular file
+      } else if (fs::is_regular_file(entry.status())) {
+        // Check if file should be ignored
+        if (srdp.get_ignore_matcher().is_ignored(entry.path())) continue;
+
+        list_untracked.push_back(Srdp::DirEntry{entry.path(), fs::last_write_time(entry.path()), false, false});
+
+      // recurse into subdirectories
+      } else if (fs::is_directory(entry.status())) {
+        // Skip internal directories
+        //if (srdp.rel_to_top(entry.path()) == Srdp::cfg_dir) continue;
+        if (srdp.get_ignore_matcher().is_ignored(entry.path())) continue;
+        iterate_dir(entry.path(), list_untracked, list_tracked, store, srdp);
+      }
+    }
+  }
+
+  std::list<Srdp::DirEntry> Srdp::get_file_list(bool only_active){
+
+    std::list<DirEntry> list_untracked;
+    std::list<DirEntry> list_tracked;
+
+    scas::Store store(get_store_dir());
+
+    try {
+      // Iterate over the file list
+      iterate_dir(top_level_dir, list_untracked, list_tracked, store, *this);
+    } catch (const fs::filesystem_error& e) {
+        std::cerr << "Filesystem error: " << e.what() << "\n";
+    }
+
+    list_untracked.sort();
+    list_untracked.unique();
+
+    list_tracked.sort();
+    list_tracked.unique();
+
+    list_untracked.splice(list_untracked.end(), list_tracked);
+
+    // look for .srdpignore
+    // look for .gitignore
+    // check: is in store
+    // check: is active experiment?
+    // check: what is the file's role?
+
+    return list_untracked;
   }
 }
 

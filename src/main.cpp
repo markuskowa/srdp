@@ -560,6 +560,23 @@ namespace srdp {
 
     srdp.verify();
   }
+
+  void command_status(int argc, char *argv[], const options& cmdopts){
+    std::string target_dir = "./";
+    if (!cmdopts.dir.empty()) target_dir = cmdopts.dir;
+    Srdp srdp(target_dir, true);
+
+    auto files = srdp.get_file_list();
+
+    std::for_each(files.cbegin(), files.cend(), [&srdp](const Srdp::DirEntry& e) {
+      if (e.is_in_store) {
+        std::cout << "tracked: " << fmt_relative_path(e.file, srdp.get_top_level_dir());
+        if (e.is_active) std::cout << " (active)";
+        std::cout << std::endl;
+      } else
+        std::cout << "untracked: " << fmt_relative_path(e.file, srdp.get_top_level_dir()) << std::endl;
+    });
+  }
 }
 
 /**
@@ -619,6 +636,8 @@ int main(int argc, char* argv[]){
         srdp::command_file(new_argc, new_argv, command_opts);
       } else if (cmd == "v" || cmd == "verify") {
         srdp::command_verify(new_argc, new_argv, command_opts);
+      } else if (cmd == "s" || cmd == "status") {
+        srdp::command_status(new_argc, new_argv, command_opts);
       } else
         throw std::invalid_argument("Unknown command");
     } else {

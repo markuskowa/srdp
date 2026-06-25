@@ -9,10 +9,12 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/string_generator.hpp>
 #include <regex>
+#include <list>
 
 #include "project.h"
 #include "experiment.h"
 #include "files.h"
+#include "ignore_file.h"
 #include "config.h"
 
 #include "cmake_config.h"
@@ -22,18 +24,30 @@ namespace srdp {
   const std::string version = PROJECT_VERSION;
 
   class Srdp {
+    public:
+      struct DirEntry {
+        fs::path file;             // path relative to top level directory
+        fs::file_time_type mtime;  // last modifcation time
+        bool is_in_store;          // file is in store
+        bool is_active;            // Belongs to active experiment
+
+        bool operator==(const DirEntry& r){
+          return file == r.file;
+        }
+        bool operator<(const DirEntry& r){
+          return file < r.file;
+        }
+      };
+
     private:
       const fs::path gc_roots_dir = "gc-roots"; // Needed as seperate dir?
 
       std::shared_ptr<Sql> db;
+      IgnoreFile ignore_matcher;
       bool interactive = false;
       fs::path top_level_dir;
 
-      fs::path find_top_level_dir(const fs::path& start_path);
-      fs::path get_store_dir();
-      fs::path get_cfg_dir();
-      fs::path rel_to_top(const fs::path& path, bool proximate = false);
-      bool path_is_in_dir(const fs::path& path);
+      void init_();
       void find_last_experiment();
       void find_open_experiments();
 
@@ -42,6 +56,7 @@ namespace srdp {
       static const std::string db_schema_version;
       static const fs::path cfg_dir;
       static const fs::path db_file;
+      static const fs::path ignore_file_name;
       static const fs::path default_store_dir;
 
       Config config;
@@ -58,6 +73,17 @@ namespace srdp {
        * If path is given the CAS is assumend to be external (and existing).
        */
       static void init(const fs::path& dir, const fs::path& store = fs::path());
+
+      // Check if path is project's directory
+      bool path_is_in_dir(const fs::path& path);
+
+      fs::path find_top_level_dir(const fs::path& start_path);
+      fs::path get_store_dir();
+      fs::path get_cfg_dir();
+      fs::path rel_to_top(const fs::path& path, bool proximate = false);
+
+      const fs::path& get_top_level_dir() { return top_level_dir; }
+      const IgnoreFile& get_ignore_matcher() { return ignore_matcher; }
 
       static std::string get_time_stamp_fmt(ctime_t = get_timestamp_now());
       static std::string get_user_name();
@@ -86,6 +112,9 @@ namespace srdp {
       void unlink_file(const std::string& project, const std::string& experiment, const std::string& id);
 
       void verify();
+
+      // List files in directory
+      std::list<DirEntry> get_file_list(bool only_active = true);
   };
 }
 
