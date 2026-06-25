@@ -257,7 +257,7 @@ namespace srdp {
     std::cout << "                  If not given, $EDITOR will be opended.\n";
     std::cout << "\n";
     std::cout << "Commands:\n";
-    std::cout << "  list, l :             List all experiments in active project\n";
+    std::cout << "  list, l:             List all experiments in active project\n";
     std::cout << "  create <name>, c:    Create a new experiment in active project\n";
     std::cout << "  info, i:             Show info about active experiment\n";
     std::cout << "  set <name|uuid>, s:  Set the current active experiment\n";
